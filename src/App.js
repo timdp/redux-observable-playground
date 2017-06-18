@@ -5,7 +5,7 @@ import A from './actions'
 import logo from './logo.svg'
 import './App.css'
 
-const BaseApp = ({count, running, onStartClick, onStopClick, onIncrementClick, onDecrementClick}) => (
+const App = ({count, running, onStartClick, onStopClick, onIncrementClick, onDecrementClick}) => (
   <div className='App'>
     <div className='App-header'>
       <img src={logo} className='App-logo' alt='logo' />
@@ -52,4 +52,4 @@ const mapDispatchToProps = (dispatch) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(BaseApp)
+)(App)
