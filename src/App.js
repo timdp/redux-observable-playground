@@ -1,35 +1,9 @@
 import React from 'react'
 import {connect} from 'react-redux'
+import K from './state-keys'
+import A from './actions'
 import logo from './logo.svg'
 import './App.css'
-
-const RE_TOKENS = /(\S+)/g
-
-const qw = (str) => {
-  const tokens = []
-  let match
-  while ((match = RE_TOKENS.exec(str)) !== null) {
-    tokens.push(match[1])
-  }
-  return tokens
-}
-
-const enumerize = (names) => Object.assign({},
-  ...names.map((name) => ({[name]: Symbol(name)})))
-
-const ACTIONS = enumerize(qw`
-  START
-  STOP
-  INCREMENT
-  DECREMENT
-  REQUEST_INCREMENT
-  REQUEST_DECREMENT
-`)
-
-const KEYS = enumerize(qw`
-  count
-  running
-`)
 
 const BaseApp = ({count, running, onStartClick, onStopClick, onIncrementClick, onDecrementClick}) => (
   <div className='App'>
@@ -56,32 +30,26 @@ const BaseApp = ({count, running, onStartClick, onStopClick, onIncrementClick, o
 )
 
 const mapStateToProps = (state) => ({
-  count: state[KEYS.count],
-  running: state[KEYS.running]
+  count: state[K.count],
+  running: state[K.running]
 })
 
 const mapDispatchToProps = (dispatch) => ({
   onStartClick: () => {
-    dispatch({type: ACTIONS.START})
+    dispatch({type: A.START})
   },
   onStopClick: () => {
-    dispatch({type: ACTIONS.STOP})
+    dispatch({type: A.STOP})
   },
   onIncrementClick: () => {
-    dispatch({type: ACTIONS.REQUEST_INCREMENT})
+    dispatch({type: A.INCREMENT})
   },
   onDecrementClick: () => {
-    dispatch({type: ACTIONS.REQUEST_DECREMENT})
+    dispatch({type: A.DECREMENT})
   }
 })
 
-const App = connect(
+export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(BaseApp)
-
-export {
-  KEYS,
-  ACTIONS,
-  App
-}

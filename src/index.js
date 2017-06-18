@@ -10,11 +10,17 @@ import ReactDOM from 'react-dom'
 import {createStore, applyMiddleware, compose} from 'redux'
 import {Provider} from 'react-redux'
 import {createEpicMiddleware, combineEpics} from 'redux-observable'
-import {KEYS as K, ACTIONS as A, App} from './App'
+import App from './App'
+import K from './state-keys'
+import A from './actions'
 import registerServiceWorker from './registerServiceWorker'
 import './index.css'
 
-const UPDATE_ACTION = Symbol('UPDATE')
+// Internal actions
+
+const A_UPDATE = Symbol('UPDATE')
+const A_INCREMENT_REAL = Symbol('INCREMENT_REAL')
+const A_DECREMENT_REAL = Symbol('DECREMENT_REAL')
 
 // Config
 
@@ -36,7 +42,7 @@ const createThrottleEpic = (inputType, outputType, time) => (action$) =>
 
 const createStateUpdateEpic = (actionType, reducer) => (action$, store) =>
   action$.ofType(actionType)
-    .map(() => ({type: UPDATE_ACTION, nextState: reducer(store.getState())}))
+    .map(() => ({type: A_UPDATE, nextState: reducer(store.getState())}))
 
 // Epics
 
@@ -46,33 +52,37 @@ const count_ = (action$) =>
       .mapTo({type: A.INCREMENT})
       .takeUntil(action$.ofType(A.STOP)))
 
-const start_ = createStateUpdateEpic(A.START, (state) => ({...state,
-  [K.running]: true
-}))
+const start_ = createStateUpdateEpic(A.START,
+  (state) => ({...state,
+    [K.running]: true
+  }))
 
-const stop_ = createStateUpdateEpic(A.STOP, (state) => ({...state,
-  [K.running]: false
-}))
+const stop_ = createStateUpdateEpic(A.STOP,
+  (state) => ({...state,
+    [K.running]: false
+  }))
 
-const requestIncrement_ = createThrottleEpic(
-  A.REQUEST_INCREMENT, A.INCREMENT, CLICK_THROTTLE_TIME)
+const increment_ = createThrottleEpic(A.INCREMENT, A_INCREMENT_REAL,
+  CLICK_THROTTLE_TIME)
 
-const requestDecrement_ = createThrottleEpic(
-  A.REQUEST_DECREMENT, A.DECREMENT, CLICK_THROTTLE_TIME)
+const decrement_ = createThrottleEpic(A.DECREMENT, A_DECREMENT_REAL,
+  CLICK_THROTTLE_TIME)
 
-const increment_ = createStateUpdateEpic(A.INCREMENT, (state) => ({...state,
-  [K.count]: state[K.count] + 1
-}))
+const incrementReal_ = createStateUpdateEpic(A_INCREMENT_REAL,
+  (state) => ({...state,
+    [K.count]: state[K.count] + 1
+  }))
 
-const decrement_ = createStateUpdateEpic(A.DECREMENT, (state) => ({...state,
-  [K.count]: state[K.count] + 1
-}))
+const decrementReal_ = createStateUpdateEpic(A_DECREMENT_REAL,
+  (state) => ({...state,
+    [K.count]: state[K.count] - 1
+  }))
 
 // Wirings
 
 const reducer = (state, action) =>
   (typeof state === 'undefined') ? DEFAULT_STATE
-    : (action.type === UPDATE_ACTION) ? action.nextState
+    : (action.type === A_UPDATE) ? action.nextState
     : state
 
 const composeEnhancers = (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ != null)
@@ -84,10 +94,10 @@ const store = createStore(reducer,
     count_,
     start_,
     stop_,
-    requestIncrement_,
-    requestDecrement_,
     increment_,
-    decrement_
+    decrement_,
+    incrementReal_,
+    decrementReal_
   )))))
 
 ReactDOM.render(
