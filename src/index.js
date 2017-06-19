@@ -49,7 +49,7 @@ const createStateUpdateEpic = (actionType, reducer) => (action$, store) =>
 const count_ = (action$) =>
   action$.ofType(A.START)
     .switchMap(() => Observable.interval(COUNT_INTERVAL)
-      .mapTo({type: A.INCREMENT})
+      .mapTo({type: A_INCREMENT_REAL})
       .takeUntil(action$.ofType(A.STOP)))
 
 const start_ = createStateUpdateEpic(A.START,
